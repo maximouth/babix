@@ -1,0 +1,67 @@
+-----------------------------------------------------------------------------
+Babix - An educational little preemptive multitask kernel for Arduino Due
+                      Francois Pessaux 04/2015.
+                 This code can be freely distributed.
+-----------------------------------------------------------------------------
+
+* Disclaimer
+------------
+This code is provided as is, with no obligation, no responsibility from the
+author.
+
+
+* License
+---------
+This code can be freely distributed, modified.
+
+
+* What it IS
+------------
+- Babix is a little preemptive multitask kernel for Arduino Due.
+- It is mostly dedicated for educational purposes.
+- It is basic and simple and aims at showing the principles underlying
+  preemptive kernels.
+- User processes must currently be endless loops.
+- The main user process (the standard loop () function) is ran only if there
+  is no other processes.
+
+It is written in C with some inevitable assembly inlines.
+Even if some files are suffixed by ".cpp", it is C. The C++ is only to
+use Serial.print () for debug or feedback printing.
+
+The code is heavily commented with the hope this will help readers.
+
+
+* What it is NOT
+----------------
+- A complete OS
+- A real-time kernel
+- A fully optimized kernel.
+
+
+* What it may become or have in the future
+------------------------------------------
+- A bit more encapsulated.
+- A bit more robust.
+- Some synchronization primitives.
+- Some inter-process communication primitives.
+- A bit more configurable.
+- Really handle or replace the function delay () of the Arduino "standard
+  library" (currently not really respecting the delays: may be longer than
+  requested).
+- Allows processes to end (instead of forcibly infinite loops).
+- Allow processes to be suspended / restarted (a kind of status for the
+  processes).
+- ... ???
+
+
+* Other works from other people
+-------------------------------
+- FreeRTOS (http://www.freertos.org)
+  A really more complex and complete real-time OS.
+
+- ChibiOS/RT (http://www.chibios.org/dokuwiki/doku.php)
+  Also a really more complex and complete real-time OS.
+
+- nisos (https://github.com/uditha-atukorala/nisos)
+  A basic multitasking OS written in C++ more complex than Babix.

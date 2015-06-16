@@ -1,0 +1,5 @@
+* Under stand why crashes if one try to create a one more process than the
+  limit. 3 as MAX_PROCESSES and creating 4 processes crashes.
+* Allow processes to end.
+* Plus all what is pending in the README.
+
