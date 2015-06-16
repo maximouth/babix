@@ -9,6 +9,11 @@
 #include "context.h"
 #include "process.h"
 #include "queue.h"
+#include "mutex.h"
+
+
+// mutex
+int *M = 0;
 
 
 /** The main and global structure of the kernel. */
@@ -32,7 +37,8 @@ struct kernel_t kernel = {
 proc_id_t create_process (void (*code)())
 {
 
-
+  //essayer de prendre le mutex 0 
+  takeM (M);
 
   /** Stack top as allocated with malloc. Reminded for liberation. */
   mcu_word_t *stack_top ;
@@ -88,5 +94,8 @@ proc_id_t create_process (void (*code)())
   /* One more process is in the pipe... Enqueue it. */
   enqueue (&kernel.queue, nb_processes) ;
   kernel.queue.cur_nb = nb_processes + 1 ;
+
+  //le relacher
+  freeM (M);
   return (nb_processes) ;
 }

@@ -23,8 +23,6 @@ typedef int16_t proc_id_t ;
 #define MAX_PROCESSES (8)
 
 
-  int tabM[4] = {0,0,0,0};  
-
 
 struct pid_queue_t {
   int16_t cur_nb ;      /* Current number of elements. */

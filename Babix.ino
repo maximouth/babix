@@ -34,10 +34,10 @@ void setup ()
   digitalWrite (13, LOW) ;  /* Turn is low. */
 
   /* Create some processes. */
-  //Serial.println ("Creating process #0") ;
-  //create_process (process0) ;
-  //Serial.println ("Creating process #1") ;
-  //create_process (process1) ;
+  Serial.println ("Creating process #0") ;
+  create_process (process0) ;
+  Serial.println ("Creating process #1") ;
+  create_process (process1) ;
   Serial.println ("Creating process #2") ;
   create_process (process2) ;
   Serial.println ("Creating process #3") ;
