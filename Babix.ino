@@ -22,7 +22,7 @@ void toto(int t) {
   x ++;
   cpt = x;
   // Serial.print(t);
-  Serial.println(cpt);
+  //Serial.println(cpt);
   
   return;
 
