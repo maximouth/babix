@@ -13,7 +13,7 @@
 
 
 // mutex
-int *M = 0;
+int M[4] = {0,0,0,0};
 
 
 /** The main and global structure of the kernel. */
@@ -38,8 +38,9 @@ proc_id_t create_process (void (*code)())
 {
 
   //essayer de prendre le mutex 0 
-  takeM (M);
-
+  takeM (&M[0]);
+  Serial.print("m0 =  ");
+  Serial.println(M[0]);
   /** Stack top as allocated with malloc. Reminded for liberation. */
   mcu_word_t *stack_top ;
   /** Pointer to the stack once a hardware stack frame has been pushed. */
@@ -96,6 +97,6 @@ proc_id_t create_process (void (*code)())
   kernel.queue.cur_nb = nb_processes + 1 ;
 
   //le relacher
-  freeM (M);
+  freeM (&M[0]);
   return (nb_processes) ;
 }

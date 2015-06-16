@@ -10,6 +10,7 @@
 
 void takeM(int *mutex);
 void freeM(int *mutex);
-
+void takeU ();
+void freeU ();
 
 #endif

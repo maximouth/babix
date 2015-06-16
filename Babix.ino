@@ -8,12 +8,41 @@
 #include "kernel.h"
 #include "context.h"
 #include "process.h"
+#include "mutex.h"
+
+//  asm volatile ("\n\t");
+int cpt = 0;
+
+
+void toto(int t) {
+  takeU();
+ 
+  int x = cpt;
+  delay (t);
+  x ++;
+  cpt = x;
+  // Serial.print(t);
+  Serial.println(cpt);
+  
+  return;
+
+  freeU();
+}
 
 
 /** Some examples of user processes. */
-void process0 () { for (;;) { Serial.println ("I'm 0") ; delay (100) ; } }
-void process1 () { for (;;) { Serial.println ("I'm 1") ; delay (1000) ; } }
-void process2 () { for (;;) { Serial.println ("I'm 2") ; delay (300) ; } }
+void process0 () { for (;;) { 
+    toto(500);
+  }
+}
+void process1 () { for (;;) { 
+    toto (250);
+  }
+}
+void process2 () { for (;;) {
+    toto (780);
+  }
+}
 void process3 () {
   for (;;) {
     Serial.println ("HIGH") ;
@@ -26,13 +55,13 @@ void process3 () {
 }
 
 
-
 void setup ()
 {
   Serial.begin (9600) ;     /* Enable serial printing. */
   pinMode (13, OUTPUT) ;    /* Set onboard LED as an output. */
   digitalWrite (13, LOW) ;  /* Turn is low. */
 
+ 
   /* Create some processes. */
   Serial.println ("Creating process #0") ;
   create_process (process0) ;
