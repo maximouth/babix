@@ -11,44 +11,50 @@
 #include "mutex.h"
 
 //  asm volatile ("\n\t");
-int cpt = 0;
+volatile uint32_t cpt = 0;
+int mutex = 0;
 
+void toto(volatile int t) {
+  takeM(&mutex);
+  // Serial.println(mutex);
 
-void toto(int t) {
-  takeU();
- 
-  int x = cpt;
-  delay (t);
-  x ++;
-  cpt = x;
-  // Serial.print(t);
-  //Serial.println(cpt);
+  volatile int x = cpt;
+  //delay(50);   
+  //  x ++;
+  cpt = x+1;
+  Serial.print(t);
   
+  freeM(&mutex);
+  //Serial.println(mutex);
   return;
-
-  freeU();
 }
 
 
 /** Some examples of user processes. */
 void process0 () { for (;;) { 
-    toto(500);
+    toto(1);
+    Serial.println(cpt);
+    delay(100);
   }
 }
 void process1 () { for (;;) { 
-    toto (250);
+    toto (2);
+    Serial.println(cpt);
+    delay(200);
   }
 }
 void process2 () { for (;;) {
-    toto (780);
+    toto (3);
+    Serial.println(cpt);
+    delay(400);
   }
 }
 void process3 () {
   for (;;) {
-    Serial.println ("HIGH") ;
+    //Serial.println ("HIGH") ;
     digitalWrite (13, HIGH) ;
     delay (1000) ;
-    Serial.println ("LOW") ;
+    //Serial.println ("LOW") ;
     digitalWrite (13, LOW) ;
     delay (1000) ;
   }
