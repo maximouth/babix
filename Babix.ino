@@ -14,39 +14,47 @@
 volatile uint32_t cpt = 0;
 int mutex = 0;
 
-void toto(volatile int t) {
+
+void toto (int t) {
+  int x ;
+  int i = 0 ;
   takeM(&mutex);
   // Serial.println(mutex);
-
-  volatile int x = cpt;
+  x = cpt;
+  asm volatile (".predaube: \n\t") ;
+  for (i = 0; i < t; i++ ) asm volatile (".daube: nop  \n\t") ;
+  asm volatile (".postdaube: \n\t") ;
   //delay(50);   
-  //  x ++;
   cpt = x+1;
-  Serial.print(t);
-  
+  //Serial.print ("toto1 ") ;Serial.print (t) ; Serial.print(" ") ;
+  Serial.println(cpt);
   freeM(&mutex);
   //Serial.println(mutex);
   return;
 }
 
 
+
+
+
 /** Some examples of user processes. */
-void process0 () { for (;;) { 
-    toto(1);
-    Serial.println(cpt);
-    delay(100);
+void process0 () {
+  for (;;) {
+    Serial.print("I'm 1 ") ;
+    toto(10000);
+    delay(50);
   }
 }
 void process1 () { for (;;) { 
-    toto (2);
-    Serial.println(cpt);
-    delay(200);
+    Serial.print("I'm 2 ") ;
+    toto (790);
+    delay(500);
   }
 }
 void process2 () { for (;;) {
-    toto (3);
-    Serial.println(cpt);
-    delay(400);
+    Serial.print("I'm 3 ") ;
+    toto (1524);
+    delay(4000);
   }
 }
 void process3 () {
