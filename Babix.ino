@@ -10,6 +10,7 @@
 #include "process.h"
 #include "mutex.h"
 
+
 //  asm volatile ("\n\t");
 volatile uint32_t cpt = 0;
 int mutex = 0;
@@ -19,14 +20,13 @@ void toto (int t) {
   int x ;
   int i = 0 ;
   takeM(&mutex);
-  // Serial.println(mutex);
+  //  Serial.println(mutex);
   x = cpt;
   asm volatile (".predaube: \n\t") ;
   for (i = 0; i < t; i++ ) asm volatile (".daube: nop  \n\t") ;
   asm volatile (".postdaube: \n\t") ;
   //delay(50);   
   cpt = x+1;
-  //Serial.print ("toto1 ") ;Serial.print (t) ; Serial.print(" ") ;
   Serial.println(cpt);
   freeM(&mutex);
   //Serial.println(mutex);
@@ -52,7 +52,7 @@ void process1 () { for (;;) {
   }
 }
 void process2 () { for (;;) {
-    Serial.print("I'm 3 ") ;
+    Serial.print("I'm 3 ");
     toto (1524);
     delay(4000);
   }

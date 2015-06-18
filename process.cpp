@@ -39,8 +39,8 @@ proc_id_t create_process (void (*code)())
  
   //essayer de prendre le mutex 0 
   takeM (&M[0]);
-  Serial.print("m0 =  ");
-  Serial.println(M[0]);
+  //Serial.print("m0 =  ");
+  //Serial.println(M[0]);
   /** Stack top as allocated with malloc. Reminded for liberation. */
   mcu_word_t *stack_top ;
   /** Pointer to the stack once a hardware stack frame has been pushed. */
