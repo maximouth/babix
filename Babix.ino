@@ -11,79 +11,115 @@
 #include "mutex.h"
 #include <LiquidCrystal.h>
 
-LiquidCrystal lcd (49,45,44,43,42,41,40,39,38,37);
+// pin for the lcd screen
+#define RS (49)
+#define E  (45)
+#define D0 (44)
+#define D1 (43)
+#define D2 (42)
+#define D3 (41)
+#define D4 (40)
+#define D5 (39)
+#define D6 (38)
+#define D7 (37)
 
+// lcd screen object
+LiquidCrystal lcd (RS,E,D0,D1,D2,D3,D4,D5,D6,D7);
 
-//  asm volatile ("\n\t");
-volatile uint32_t cpt = 0;
+// global variable, nearly all the process modify it
+volatile uint32_t cpt = 0 ;
+// the lock (0 == free, 1 == take)
 uint32_t mutex = 0;
 
-
+// the critical section
+// read cpt, wait, cpt = cpt + 1, print cpt
+// t is the time to wait in the funtion
 void toto (int t) {
   int x ;
-  int i = 0 ;
+
+  //claim the take of the lock
   takeM(&mutex);
-  //  Serial.println(mutex);
-  x = cpt;
-  for (i = 0; i < t; i++ ) asm volatile (".daube: nop  \n\t") ;
-  delay(50);
+
+  //there is no possibility of two process exec 
+  //the following code at the same time
+
+#ifdef SERIAL_DEBUG
+  Serial.println(mutex);
+#endif
   
+  // read cpt and place it into x
+  x = cpt;
+  //wait t ms
+  delay(t);
+  // increment cpt
   cpt = x+1;
-  //Serial.println(cpt);
-  //
-  //lcd.clear();
+
+#ifdef SERIAL_DEBUG
+  Serial.println(cpt);
+#endif
+  //print cpt on the second raw
   lcd.setCursor (0,1) ;
   lcd.print (cpt) ;
   
+  //free the lock
   freeM (&mutex) ;
-  //Serial.println(mutex);
+
+#ifdef SERIAL_DEBUG
+  Serial.println(mutex);
+#endif
+
   return;
 }
 
 
-
-
-
 /** Some examples of user processes. */
+
 void process0 () {
   for (;;) {
-    //Serial.print("I'm 1 ") ;
+#ifdef SERIAL_DEBUG
+    Serial.print("I'm 1 ") ;
+#endif 
+    //print on the first raw
     lcd.setCursor(0,0);
     lcd.print('1');
-    //lcd.clear(); 
-    //set cursor
-  //        lcd.write8bits(0x80 | ( 1+ 0x00));
-    toto(10500);
+    toto(15);
     delay(70);
   }
 }
-void process1 () { for (;;) { 
-    //Serial.print("I'm 2 ") ;
+void process1 () { 
+    for (;;) { 
+#ifdef SERIAL_DEBUG
+    Serial.print("I'm 2 ") ;
+#endif
+    //print on the first raw
     lcd.setCursor(0,0);
     lcd.print('2');
-    //lcd.clear();  
-//  lcd.write8bits(0x80 | ( 1+ 0x00));
-    toto (990);
+    toto (99);
     delay(470);
   }
 }
-void process2 () { for (;;) {
-    //Serial.print("I'm 3 ")
+void process2 () { 
+      for (;;) {
+#ifdef SERIAL_DEBUG
+    Serial.print("I'm 3 ")
+#endif
+    //print on the first raw
     lcd.setCursor(0,0);
     lcd.print('3');
-    //lcd.clear();
-//    lcd.write8bits(0x80 | ( 1+ 0x00));
-    toto (1224);
+    toto (24);
     delay(3700);
   }
 }
 void process3 () {
   for (;;) {
-    //Serial.println ("HIGH") ;
+#ifdef SERIAL_DEBUG
+    Serial.println ("HIGH") ;
+#endif
     digitalWrite (13, HIGH) ;
-    //lcd.clear();
     delay (1000) ;
-    //Serial.println ("LOW") ;
+#ifdef SERIAL_DEBUG
+    Serial.println ("LOW") ;
+#endif
     digitalWrite (13, LOW) ;
     delay (1000) ;
   }
@@ -95,38 +131,33 @@ void setup ()
 #ifdef SERIAL_DEBUG
   Serial.begin (9600) ;     /* Enable serial printing. */
 #endif
-  lcd.begin(16,2);  
-  lcd.clear();
+  lcd.begin(16,2);          /* Enable lcd screen ( 16 char per row, 2 rows )*/
+  lcd.clear();              /* clear the possible previous thing on the screen*/
   pinMode (13, OUTPUT) ;    /* Set onboard LED as an output. */
   digitalWrite (13, LOW) ;  /* Turn is low. */
-  //lcd.autoscroll();
  
   /* Create some processes. */
-  asm volatile ("pop { r2, r3 }  \n\t") ;
+
 #ifdef SERIAL_DEBUG
-  //Serial.println ("Creating process #0") ;
+  Serial.println ("Creating process #0") ;
 #endif
-  // lcd.print("CRT #0");
   create_process (process0) ;
-  //  lcd.print("suite");
-  //lcd.setCursor(0,0);
-  //lcd.print("CRT #1");
+
 #ifdef SERIAL_DEBUG
-  //Serial.println ("Creating process #1") ;
+  Serial.println ("Creating process #1") ;
 #endif
   create_process (process1) ;
 
 #ifdef SERIAL_DEBUG
-  //Serial.println ("Creating process #2") ;
+  Serial.println ("Creating process #2") ;
 #endif
   create_process (process2) ;
 
 #ifdef SERIAL_DEBUG
-  //  Serial.println ("Creating process #3") ;
+    Serial.println ("Creating process #3") ;
 #endif
   create_process (process3) ;
-  //lcd.clear();
-  
+   
   /* Set interrupts to be preemptive. Change the grouping to set no
      sub-priority.
      See SAM3x8E datasheet 12.6.6 page 84 and 12.21.6.1 page 177. */
@@ -144,13 +175,13 @@ void setup ()
   NVIC_SetPriority (PendSV_IRQn, 0xFF) ;
   /* NVIC_EnableIRQ (SVCall_IRQn) ;  Seems useless O_o */
 
-  //lcd.clear();
 
 }
 
 
 
 uint32_t dummy_counter = 0 ;
+
 /** Main process. Will only be executed if no more processes are running. */
 void loop ()
 {
@@ -158,7 +189,7 @@ void loop ()
   dummy_counter++ ;
   lcd.print("Mainprocess");
 #ifdef SERIAL_DEBUG
-// Serial.print ("Main process: ") ;
-//Serial.println (dummy_counter) ;
+  Serial.print ("Main process: ") ;
+  Serial.println (dummy_counter) ;
 #endif
 }
