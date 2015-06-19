@@ -13,7 +13,7 @@
   Attempt to acquire the lock. This function used the lock whose address is
   provided as argument.
 */
-void mutex_acquire (volatile uint32_t *mutex)
+void mutex_acquire (mutex_t *mutex)
 {
   /* No need to save the registers used in this function. In effect, we only
      use scratch registers r2 and r3. Gcc seems to store our argument in r0
@@ -47,7 +47,7 @@ void mutex_acquire (volatile uint32_t *mutex)
 
 /** Release the lock whose adress is passed as argument.
     Typically, this is to call after the critical section. */
-void mutex_release (volatile uint32_t *mutex)
+void mutex_release (mutex_t *mutex)
 {
   /* No need to save the register, we use a scratch register. */
   asm volatile ("mov r2, #0    \n\t") ;

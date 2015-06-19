@@ -12,8 +12,10 @@
 extern "C" {
 #endif
 
-void mutex_acquire (volatile uint32_t *mutex) ;
-void mutex_release (volatile uint32_t *mutex) ;
+/** Type of a mutex lock. */
+typedef volatile uint32_t mutex_t ;
+void mutex_acquire (mutex_t *mutex) ;
+void mutex_release (mutex_t *mutex) ;
 
 #ifdef __cplusplus
 }

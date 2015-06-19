@@ -12,8 +12,10 @@
 #include "mutex.h"
 
 
-// mutex
-uint32_t M[4] = {0,0,0,0};
+/** Mutex to prevent concurrent creation of processes. This is to prevent
+    the kernel tables from being modified in an inconsisteny way in case of
+    concurrence. */
+static mutex_t cr_process_mutex = 0 ;
 
 
 /** The main and global structure of the kernel. */
@@ -38,7 +40,7 @@ proc_id_t create_process (void (*code)())
 {
  
   /* Try to acquire mutex 0. */
-  mutex_acquire (&M[0]) ;
+  mutex_acquire (&cr_process_mutex) ;
 
   /** Stack top as allocated with malloc. Reminded for liberation. */
   mcu_word_t *stack_top ;
@@ -96,7 +98,7 @@ proc_id_t create_process (void (*code)())
   kernel.queue.cur_nb = nb_processes + 1 ;
 
   /* Release the mutex 0 acquired at the begining of the function. */
-  mutex_release (&M[0]) ;
+  mutex_release (&cr_process_mutex) ;
  
   return (nb_processes) ;
 }
