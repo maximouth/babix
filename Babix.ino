@@ -28,20 +28,20 @@ LiquidCrystal lcd (RS,E,D0,D1,D2,D3,D4,D5,D6,D7);
 
 // global variable, nearly all the process modify it
 volatile uint32_t cpt = 0 ;
-// the lock (0 == free, 1 == take)
-uint32_t mutex = 0;
+/* The lock to protect the shared variable. 0 == free, 1 == taken. */
+static uint32_t mutex = 0;
 
 // the critical section
 // read cpt, wait, cpt = cpt + 1, print cpt
 // t is the time to wait in the funtion
-void toto (int t) {
+void concurrent_increment (int t)
+{
   int x ;
 
-  //claim the take of the lock
-  takeM(&mutex);
-
-  //there is no possibility of two process exec 
-  //the following code at the same time
+  /* Claim the lock to prevent several processes from modifying the kernel
+     tables concurrently if they attempt to create processes "at the same
+     time". */
+  mutex_acquire (&mutex) ;
 
 #ifdef SERIAL_DEBUG
   Serial.println(mutex);
@@ -61,14 +61,14 @@ void toto (int t) {
   lcd.setCursor (0,1) ;
   lcd.print (cpt) ;
   
-  //free the lock
-  freeM (&mutex) ;
+  /* Release the mutex to leave the critical section. */
+  mutex_release (&mutex) ;
 
 #ifdef SERIAL_DEBUG
   Serial.println(mutex);
 #endif
 
-  return;
+  return ;
 }
 
 
@@ -82,7 +82,7 @@ void process0 () {
     //print on the first raw
     lcd.setCursor(0,0);
     lcd.print('1');
-    toto(15);
+    concurrent_increment(15);
     delay(70);
   }
 }
@@ -94,7 +94,7 @@ void process1 () {
     //print on the first raw
     lcd.setCursor(0,0);
     lcd.print('2');
-    toto (99);
+    concurrent_increment (99);
     delay(470);
   }
 }
@@ -106,7 +106,7 @@ void process2 () {
     //print on the first raw
     lcd.setCursor(0,0);
     lcd.print('3');
-    toto (24);
+    concurrent_increment (24) ;
     delay(3700);
   }
 }

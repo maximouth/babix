@@ -37,10 +37,9 @@ struct kernel_t kernel = {
 proc_id_t create_process (void (*code)())
 {
  
-  //essayer de prendre le mutex 0 
-  takeM (&M[0]);
-  //Serial.print("m0 =  ");
-  //Serial.println(M[0]);
+  /* Try to acquire mutex 0. */
+  mutex_acquire (&M[0]) ;
+
   /** Stack top as allocated with malloc. Reminded for liberation. */
   mcu_word_t *stack_top ;
   /** Pointer to the stack once a hardware stack frame has been pushed. */
@@ -96,10 +95,8 @@ proc_id_t create_process (void (*code)())
   enqueue (&kernel.queue, nb_processes) ;
   kernel.queue.cur_nb = nb_processes + 1 ;
 
-  //le relacher
-  freeM (&M[0]);
-  // Serial.print("m1 =  ");
-  //Serial.println(M[0]);
+  /* Release the mutex 0 acquired at the begining of the function. */
+  mutex_release (&M[0]) ;
  
   return (nb_processes) ;
 }
