@@ -19,7 +19,8 @@ void HardFault_Handler ()
   Serial.println (*((mcu_word_t*)0x02C), BIN) ;
 }
 
-void MemManage_Handler () { Serial.println ("MemManage") ; }
+  void MemManage_Handler () { //Serial.println ("MemManage") ; }
+    Serial.println ('M') ; }
 
 void BusFault_Handler () { Serial.println ("Bus Fault") ; }
 

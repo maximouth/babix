@@ -13,7 +13,7 @@
 
 
 // mutex
- int M[4] = {0,0,0,0};
+uint32_t M[4] = {0,0,0,0};
 
 
 /** The main and global structure of the kernel. */
