@@ -75,6 +75,7 @@ void loop ()
 {
   delay (500) ;
   dummy_counter++ ;
+  lcdMain();
 //lcd.print("Mainprocess");
 #ifdef SERIAL_PRINT
   Serial.print ("Main process: ") ;

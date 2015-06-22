@@ -116,3 +116,6 @@ void process3 ()
   }
 }
 
+void lcdMain() {
+  lcd.print("Main procces");
+}
