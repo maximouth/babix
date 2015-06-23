@@ -117,6 +117,9 @@ int sysTickHook ()
 } /* End of extern "C" for sysTickHook (). */
 
 /*
+
+Why we don't use a CLREX with our LDREX and STREX
+
 -> what is CLREX
 
 CLREX is an instruction wich will fail the next STREX that will appear, so the 
