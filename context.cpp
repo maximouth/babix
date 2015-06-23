@@ -115,3 +115,44 @@ int sysTickHook ()
 }
 
 } /* End of extern "C" for sysTickHook (). */
+
+/*
+-> what is CLREX
+
+CLREX is an instruction wich will fail the next STREX that will appear, so the 
+store fail too.
+(see 12.12.9 page 114)
+
+-> why we need it generally
+
+There is an example to explain why we need to use CLREX :
+
+There is 2 variables A and B and 3 processes P1, P2 and P3.
+
+P1 do a LDREX on B and up the exclusive tag.
+P1 is switch, and somethings are done.
+P3 do a LDREX on B,and up the tag that is already up.
+And do a STREX on B that succed beacause the tag is up.
+The exclusive access tag is now down.
+P3 is switch.
+P2 up the tag and do a LDREX on A.
+P2 is switch.
+P1 come and do is STREX on B wich succed because P2 up the tag.
+
+So the memory is corrupt.
+That is why the need a CLREX, and each context switch so we can down the tag 
+for the following thread.
+
+
+-> why we don't need it here
+
+There 3 conditions that make the processor remove the exclusive acces tag:
+- exec a CLREX instruction,
+- exec a STREX instruction wich succed or failed,
+- if an exception occurs.
+(see 12.5.7.2 p 78)
+
+and here the task switching is doing by an exception, so each time we switch of
+thread, a CLREX is done automatically, and we don't need to use one ourself.
+
+ */

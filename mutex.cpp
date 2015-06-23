@@ -22,7 +22,7 @@ void mutex_acquire (mutex_t *mutex)
  take:
   /* Ask an exclusive access on the lock and get its value by the way
      (c.f. datasheet section 12.5.7 page 78 and section 12.12.8 page 112. */
-  asm volatile ("ldrex r3, [%0]   \n\t" :: "r" (mutex) : "memory") ;
+  asm volatile ("ldrex r3, [%0]   \n\t" :: "r" (mutex) : "r3", "memory") ;
   /* Check the value of the lock. If it is taken (==1) we must retry. */
   asm volatile ("mov r2, #1  \n\t" ::: "r2") ;
   asm volatile ("cmp r2, r3  \n\t") ;
