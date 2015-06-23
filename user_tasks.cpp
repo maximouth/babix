@@ -29,8 +29,9 @@ void concurrent_increment (int t)
   /* Claim the lock to prevent several processes from modifying the kernel
      tables concurrently if they attempt to create processes "at the same
      time". */
-  //mutex_acquire (&mutex) ;
-  sem_acquire(0);
+  mutex_acquire (&mutex) ;
+  
+  //sem_acquire(0);
 
 
 #ifdef SERIAL_DEBUG
@@ -53,8 +54,8 @@ void concurrent_increment (int t)
   lcd.print (cpt) ;
   
   /* Release the mutex to leave the critical section. */
-  //mutex_release (&mutex) ;
-  sem_release(0);
+  mutex_release (&mutex) ;
+  //sem_release(0);
 
 
 #ifdef SERIAL_DEBUG
@@ -127,8 +128,11 @@ void process3 ()
 /***
  Print on the lcd, it is use in the main loop.
  ***/
-void lcdMain() {
-  lcd.print("Main procces");
+void lcdMain(int cpt) {
+  lcd.setCursor (0,0);
+  lcd.print("Main proccess ");
+  lcd.setCursor (0,1);
+  lcd.print(cpt);
 }
 
 /***

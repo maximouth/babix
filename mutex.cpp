@@ -51,7 +51,7 @@ void mutex_acquire (mutex_t *mutex)
 void mutex_release (mutex_t *mutex)
 {
   /* No need to save the register, we use a scratch register. */
-  asm volatile ("mov r2, #0    \n\t") ;
+  asm volatile ("mov r2, #0    \n\t" ::: "r2") ;
   asm volatile ("str r2, [%0]  \n\t" :: "r" (mutex) : "memory") ;
   return ;
 }

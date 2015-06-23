@@ -50,26 +50,26 @@ __attribute__ ( ( naked ) ) void pendSVHook (void)
 
   /* Guess the outgoing process id. */
   outgoing_proc_id = kernel.current_process_id ;
+  /* Only enqueue the outcomming process if it is not the "Idle" task. */
+  if (outgoing_proc_id != MAIN_PROCESS_ID)
+    enqueue (&kernel.queue, outgoing_proc_id) ;
   /* Guess the incoming process id. */
   incoming_proc_id = take (&kernel.queue) ;
   /* Record the new running process. incoming_proc_id could be removed and
      replaced by kernel.current_process_id in fact. */
   kernel.current_process_id = incoming_proc_id ;
 
-  /* Put the process in the queue and save the outgoing process' SP.
+  /* Save the outgoing process' SP.
      If the process is the main process, then save its SP in the kernel
      structure, otherwise in the process's structure.
      r1 = outgoing stack pointer. */
   if (outgoing_proc_id != MAIN_PROCESS_ID) {
-    /* Only enqueue the outcomming process if there is another process
-       to run. If there is no, the outcomming process will remain active,
-       hence we will have saved an enqueue/take. */
-    if (incoming_proc_id != MAIN_PROCESS_ID)
-      enqueue (&kernel.queue, outgoing_proc_id) ;
     outgoing_proc = &kernel.processes[outgoing_proc_id] ;
     asm volatile ("mov r1, %0     \n\t" :: "r" (&outgoing_proc->sp)) ;
   }
   else asm volatile ("mov r1, %0     \n\t" :: "r" (&kernel.main_task_sp)) ;
+
+
   /* Really save outgoing SP. */
   asm volatile ("mrs r2, msp    \n\t") ;
   asm volatile ("str r2, [r1]   \n\t") ;

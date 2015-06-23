@@ -34,14 +34,14 @@ digitalWrite (13, LOW) ;  /* Turn is low. */
   /* Create some processes. */
 
 #ifdef SERIAL_PRINT
-Serial.println ("Creating process #0") ;
+//Serial.println ("Creating process #0") ;
 #endif
-create_process (process0) ;
+ create_process (process0) ;
 
 #ifdef SERIAL_PRINT
-  Serial.println ("Creating process #1") ;
+// Serial.println ("Creating process #1") ;
 #endif
-  create_process (process1) ;
+ create_process (process1) ;
 
 #ifdef SERIAL_PRINT
   Serial.println ("Creating process #2") ;
@@ -51,7 +51,7 @@ create_process (process0) ;
 #ifdef SERIAL_PRINT
     Serial.println ("Creating process #3") ;
 #endif
-  create_process (process3) ;
+    create_process (process3) ;
   /* Set interrupts to be preemptive. Change the grouping to set no
      sub-priority.
      See SAM3x8E datasheet 12.6.6 page 84 and 12.21.6.1 page 177. */
@@ -81,7 +81,7 @@ void loop ()
 {
   delay (500) ;
   dummy_counter++ ;
-  lcdMain();
+  lcdMain(dummy_counter);
 //lcd.print("Mainprocess");
 #ifdef SERIAL_PRINT
   Serial.print ("Main process: ") ;

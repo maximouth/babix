@@ -3,7 +3,7 @@
 #include "user_tasks.h"
 
 #ifdef DEBUG
-static volatile uint32_t DebugSem = 70;
+static volatile uint32_t DebugSem = 0;
 #endif
 
 static volatile uint32_t S[5] = {0,0,0,0,0};
@@ -53,9 +53,8 @@ void sem_acquire (int num)
   /* Attention: must use an asm goto to make sure that gcc will know that 
      we need to go back and re exec the previous code, to avoid register 
      problem.
-     If you are not going to use that, gcc will not kown that there is a label,
-     and there is a chance that you kill the register with the address of
-     the lock in the array.
+     If you are not going to use that, gcc will not kown that a label exist,
+     and  you can kill the register with the lock address.
  */
   asm volatile goto ("beq %0   \n\t" :::: sem) ;  /* Loop back. */
 
