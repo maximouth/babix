@@ -22,6 +22,7 @@ void process3 ();
 
 void setup_lcd();
 void lcdMain();
+void lcdDebug(int val);
 
 
 #endif

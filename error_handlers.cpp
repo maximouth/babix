@@ -15,7 +15,7 @@ extern "C" { /* Start of extern "C" for redefinition of weak functions. */
     error would be a better idea. */
 void HardFault_Handler ()
 {
-  Serial.print ("Hard Fault: ") ;
+  Serial.print ("hard Fault: ") ;
   Serial.println (*((mcu_word_t*)0x02C), BIN) ;
 }
 

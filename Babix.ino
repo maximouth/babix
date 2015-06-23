@@ -4,7 +4,7 @@
   François Pessaux 04/2015.
   This code can be freely distributed.
 */
-// #define SERIAL_PRINT
+//#define SERIAL_PRINT
 
 #include <Arduino.h>
 #include "kernel.h"
@@ -12,24 +12,31 @@
 #include "process.h"
 #include "mutex.h"
 #include "user_tasks.h"
+#include "semaphore.h"
 #include <LiquidCrystal.h>
 
 
 void setup ()
 {
+sem_init(0,1); 
+
+Serial.begin (9600) ;     /* Enable serial printing. */
+
 #ifdef SERIAL_PRINT
-  Serial.begin (9600) ;     /* Enable serial printing. */
+Serial.begin (9600) ;     /* Enable serial printing. */
 #endif
 setup_lcd();
-  pinMode (13, OUTPUT) ;    /* Set onboard LED as an output. */
-  digitalWrite (13, LOW) ;  /* Turn is low. */
- 
+pinMode (13, OUTPUT) ;    /* Set onboard LED as an output. */
+digitalWrite (13, LOW) ;  /* Turn is low. */
+
+
+
   /* Create some processes. */
 
 #ifdef SERIAL_PRINT
-  Serial.println ("Creating process #0") ;
+Serial.println ("Creating process #0") ;
 #endif
-  create_process (process0) ;
+create_process (process0) ;
 
 #ifdef SERIAL_PRINT
   Serial.println ("Creating process #1") ;
@@ -45,7 +52,6 @@ setup_lcd();
     Serial.println ("Creating process #3") ;
 #endif
   create_process (process3) ;
-   
   /* Set interrupts to be preemptive. Change the grouping to set no
      sub-priority.
      See SAM3x8E datasheet 12.6.6 page 84 and 12.21.6.1 page 177. */

@@ -2,6 +2,9 @@
 #include <Arduino.h>
 #include <LiquidCrystal.h>
 #include "mutex.h"
+#include "semaphore.h"
+
+//#define SERIAL_DEBUG
 
 // lcd screen object
 LiquidCrystal lcd (RS,E,D0,D1,D2,D3,D4,D5,D6,D7);
@@ -27,6 +30,8 @@ void concurrent_increment (int t)
      tables concurrently if they attempt to create processes "at the same
      time". */
   mutex_acquire (&mutex) ;
+//  sem_acquire(0);
+
 
 #ifdef SERIAL_DEBUG
   Serial.println (mutex) ;
@@ -43,11 +48,14 @@ void concurrent_increment (int t)
   Serial.println (cpt) ;
 #endif
   //print cpt on the second raw
+  //lcd.clear();
   lcd.setCursor (0, 1) ;
   lcd.print (cpt) ;
   
   /* Release the mutex to leave the critical section. */
   mutex_release (&mutex) ;
+  //sem_release(0);
+
 
 #ifdef SERIAL_DEBUG
   Serial.println (mutex) ;
@@ -82,7 +90,7 @@ void process1 ()
     lcd.setCursor(0,0);
     lcd.print('2');
     concurrent_increment (99);
-    delay(470);
+    delay(770);
   }
 }
 
@@ -118,4 +126,10 @@ void process3 ()
 
 void lcdMain() {
   lcd.print("Main procces");
+}
+
+void lcdDebug(int val) {
+  lcd.setCursor (3,0);
+  lcd.print(val);
+  return;
 }
