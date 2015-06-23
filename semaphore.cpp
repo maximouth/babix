@@ -8,53 +8,79 @@ static volatile uint32_t DebugSem = 70;
 
 static volatile uint32_t S[5] = {0,0,0,0,0};
 
-/*initialise le semaphore numero "num" à la valeur "val"  */
-void sem_init (int num, int val) {
+/* Initialise the semaphore number "num" to the value "val". */
+void sem_init (int num, int val)
+ {
   S[num] = val;
   return;
 }
 
+
+/***
+    Attempt to acquire one of the lock. This function used the number of the 
+    lock you are going to use as argument
+ ***/
 void sem_acquire (int num)
 {
+/*  No need to save the registers used in this function. In effect, we only
+    use scratch registers r1 and r2. Gcc seems to store our argument in r0
+    which is also a scratch register. */
+
+/* The label. */
  sem:
-  //valeur du semaphore dans r3
+  /* Ask an exclusive access on the lock and get its value by the way
+     (c.f. datasheet section 12.5.7 page 78 and section 12.12.8 page 112.  */
   asm volatile ("ldrex r1, [%0]   \n\t" :: "r" (&S[num]) : "r1", "memory") ;
 
-  /*
 #ifdef DEBUG
-  asm volatile ("push {r1, r0 }  \n\t");
-  // asm volatile ("mov %0, r1 \n\t" : "=r" (DebugSem) :: "memory" );
-  // Serial.print("S ");
-  // Serial.println(DebugSem);
-  //lcdDebug(S[0]);
-  asm volatile ("pop {r1, r0 }  \n\t");
-#endif
+  /* If you want to print the lock value use one the this.
+     We need to save the used register before calling a function. */
+  asm volatile ("push {r1, r0 }  \n\t") ;
+  /* 
+     //Print on the serial port.
+     asm volatile ("mov %0, r1 \n\t" : "=r" (DebugSem) :: "memory" ) ;
+     Serial.print ("S ") ;
+     Serial.println (DebugSem) ;
   */
+  // print on the lcd screen.
+  lcdDebug(S[0]);
+  asm volatile ("pop {r1, r0 }  \n\t") ;
+#endif
 
-  /* test si le semaphore est plein ou non (==0 plein) (superieur vide)   */
+  /* Check the value of the lock. If it is full (==0) we must retry.  */
   asm volatile ("mov r2, #0  \n\t" ::: "r2") ;
   asm volatile ("cmp r2, r1  \n\t") ;
-  /* Attention: must use an asm goto to make sure that gcc. */
+  /* Attention: must use an asm goto to make sure that gcc will know that 
+     we need to go back and re exec the previous code, to avoid register 
+     problem.
+     If you are not going to use that, gcc will not kown that there is a label,
+     and there is a chance that you kill the register with the address of
+     the lock in the array.
+ */
   asm volatile goto ("beq %0   \n\t" :::: sem) ;  /* Loop back. */
 
- /* si non plein decrementer la valeur du semaphore  */
+  /* Lock is not == 0, hence is not full. Let's try to acquire it and 
+     decrement it's value. */
   asm volatile ("sub r1, r1, #1  \n\t" ::: "r1") ;
-  /* et stocker ca dans le bon semaphore  */
+  /* And stock it in the right lock */
   asm volatile ("strex r2, r1, [%0]  \n\t" :: "r" (&S[num]) : "r2", "memory") ;
 
-  /* tester si la valeur à bien été ecrite  */
+  /*  Check return value: if 0 write succeeded otherwise failure. In case of
+      failure we must retry the whole process (i.e. reading the lock's value
+      and if possible trying to write 1 inside. */
   asm volatile ("mov r1, #1  \n\t" ::: "r1") ;
   asm volatile ("cmp r2, r1      \n\t") ;
-
   asm volatile goto ("beq %0   \n\t" :::: sem) ;  /* Loop back. */
 
   return ;
 
 }
 
-
-void sem_release (int num) {
-
+/***
+    Release one lock whose number is passed as argument.
+    Typically, this is to call after the critical section.
+***/
+void sem_release (int num) 
+{
   S[num] += 1 ;
-
 }

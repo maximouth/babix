@@ -9,10 +9,10 @@
 #include "mutex.h"
 
 
-/**
+/***
   Attempt to acquire the lock. This function used the lock whose address is
   provided as argument.
-*/
+***/
 void mutex_acquire (mutex_t *mutex)
 {
   /* No need to save the registers used in this function. In effect, we only
