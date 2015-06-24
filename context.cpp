@@ -1,6 +1,7 @@
 /*
   Babix - An educational little preemptive multitask kernel for Arduino Due.
   Francois Pessaux 04/2015.
+  Maxime Ayrault 06/2015.
   This code can be freely distributed.
 */
 
@@ -10,7 +11,6 @@
 #include "process.h"
 #include "queue.h"
 #include "mutex.h"
-
 
 /* The following variables are made global to avoid having them on the context
    switcher stack. This avoids the stack frame being modified and simplifies
@@ -45,34 +45,45 @@ __attribute__ ( ( naked ) ) void pendSVHook (void)
 {
   /* Push the context on the current process's stack.
      push is a synonym for STMDB sp!, relist */
-  asm volatile (".save_outgoin_context: \n") ;
+  asm volatile (".save_outgoin_context: \n\t") ;
   asm volatile ("push    {r4 - r11, lr} \n\t") ;
 
   /* Guess the outgoing process id. */
   outgoing_proc_id = kernel.current_process_id ;
+  /* If the PID is negative, then the process with a PID being the absolute
+     value is ended and must be destroyed. */
+  if (outgoing_proc_id < 0) {
+    kernel.processes[- outgoing_proc_id ].pid = MAIN_PROCESS_ID ;
+    free (kernel.processes[- outgoing_proc_id ].top_stack) ;
+  }
   /* Only enqueue the outcomming process if it is not the "Idle" task. */
-  if (outgoing_proc_id != MAIN_PROCESS_ID)
+  if ((outgoing_proc_id != MAIN_PROCESS_ID) && (outgoing_proc_id > 0))
     enqueue (&kernel.queue, outgoing_proc_id) ;
   /* Guess the incoming process id. */
-  incoming_proc_id = take (&kernel.queue) ;
+   incoming_proc_id = take (&kernel.queue) ;
   /* Record the new running process. incoming_proc_id could be removed and
      replaced by kernel.current_process_id in fact. */
   kernel.current_process_id = incoming_proc_id ;
 
-  /* Save the outgoing process' SP.
-     If the process is the main process, then save its SP in the kernel
-     structure, otherwise in the process's structure.
-     r1 = outgoing stack pointer. */
-  if (outgoing_proc_id != MAIN_PROCESS_ID) {
-    outgoing_proc = &kernel.processes[outgoing_proc_id] ;
-    asm volatile ("mov r1, %0     \n\t" :: "r" (&outgoing_proc->sp)) ;
+  /* Save the outgoing process' SP **only** if there is one, i.e. we are not
+     there because an end of process (which, in this case, doesn't exist
+     anymore).
+     If the outgoing process is the main process, then save its SP in the
+     kernel structure, otherwise in the process's structure.
+     Note: at the end of this pice of code, r1 = outgoing stack pointer. */
+  if (outgoing_proc_id >= 0) {
+    if (outgoing_proc_id != MAIN_PROCESS_ID) {
+      outgoing_proc = &kernel.processes[outgoing_proc_id] ;
+      asm volatile ("mov r1, %0     \n\t" :: "r" (&outgoing_proc->sp) : "r1") ;
   }
-  else asm volatile ("mov r1, %0     \n\t" :: "r" (&kernel.main_task_sp)) ;
-
-
-  /* Really save outgoing SP. */
-  asm volatile ("mrs r2, msp    \n\t") ;
-  asm volatile ("str r2, [r1]   \n\t") ;
+    else {
+      asm volatile
+	("mov r1, %0     \n\t" :: "r" (&kernel.main_task_sp) : "r1") ;
+    }
+    /* Really save outgoing SP. */
+    asm volatile ("mrs r2, msp    \n\t" ::: "r2") ;
+    asm volatile ("str r2, [r1]   \n\t"  ::: "memory") ;
+  }
 
   /* Restore the incoming process' SP.
      If the process is the main process, then load its SP from the kernel
@@ -80,9 +91,10 @@ __attribute__ ( ( naked ) ) void pendSVHook (void)
      r0 = incoming stack pointer. */
   if (incoming_proc_id != MAIN_PROCESS_ID) {
     incoming_proc = &kernel.processes[incoming_proc_id] ;
-    asm volatile ("mov r0, %0     \n\t" :: "r" (incoming_proc->sp)) ;
+    asm volatile ("mov r0, %0     \n\t" :: "r" (incoming_proc->sp) : "r0") ;
   }
-  else asm volatile ("mov r0, %0     \n\t" :: "r" (kernel.main_task_sp)) ;
+  else
+    asm volatile ("mov r0, %0     \n\t" :: "r" (kernel.main_task_sp) : "r0") ;
   /* Really write incoming SP. */
   asm volatile ("msr msp, r0    \n\t") ;
 
@@ -90,7 +102,8 @@ __attribute__ ( ( naked ) ) void pendSVHook (void)
      stack.
      pop is a synonym for LDMIA sp! reglist */
   asm volatile (".restore_incoming_context: \n\t") ;
-  asm volatile ("pop {r4 - r11, lr}          \n\t") ;
+  asm volatile ("pop {r4 - r11, lr}          \n\t" :::
+		"r4", "r5", "r6", "r7","r8", "r9", "r10", "r11") ;
   /* Exit from exception by jumping at LR which must be 0xFFFFFFF9.
      See SAM3x8E datasheet 16.6.7.6 page 86. */
   asm volatile ("bx lr                       \n\t") ;

@@ -43,7 +43,7 @@ struct process_t {
 
 /** Process identifier of the main process, i.e. the standard loop ()
     function. */
-#define MAIN_PROCESS_ID (-1)
+#define MAIN_PROCESS_ID (0)
 
 
 /** Structure grouping all the kernel state information. */

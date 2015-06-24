@@ -18,6 +18,7 @@
 
 void setup ()
 {
+  int tmp = 0;
 sem_init(0,1); 
 
 Serial.begin (9600) ;     /* Enable serial printing. */
@@ -29,29 +30,34 @@ setup_lcd();
 pinMode (13, OUTPUT) ;    /* Set onboard LED as an output. */
 digitalWrite (13, LOW) ;  /* Turn is low. */
 
-
-
   /* Create some processes. */
 
 #ifdef SERIAL_PRINT
-//Serial.println ("Creating process #0") ;
+  Serial.println ("Creating process #1") ;
 #endif
- create_process (process0) ;
-
-#ifdef SERIAL_PRINT
-// Serial.println ("Creating process #1") ;
-#endif
- create_process (process1) ;
-
+  tmp =  create_process (process1) ;
+  Serial.println((int)kernel.processes[tmp].sp , HEX);
+  
 #ifdef SERIAL_PRINT
   Serial.println ("Creating process #2") ;
 #endif
-  create_process (process2) ;
+  tmp = create_process (process2) ;
+  Serial.println((int) kernel.processes[tmp].sp , HEX);
+
+  /*
+#ifdef SERIAL_PRINT
+  Serial.println ("Creating process #3") ;
+#endif
+  tmp =  create_process (process3) ;
+  Serial.println((int) kernel.processes[tmp].sp , HEX);
+  */
 
 #ifdef SERIAL_PRINT
-    Serial.println ("Creating process #3") ;
+    Serial.println ("Creating process #4") ;
 #endif
-    create_process (process3) ;
+    tmp = create_process (process4) ;
+    Serial.println((int) kernel.processes[tmp].sp , HEX);
+    Serial.println ("Daube") ;
   /* Set interrupts to be preemptive. Change the grouping to set no
      sub-priority.
      See SAM3x8E datasheet 12.6.6 page 84 and 12.21.6.1 page 177. */
@@ -82,7 +88,7 @@ void loop ()
   delay (500) ;
   dummy_counter++ ;
   lcdMain(dummy_counter);
-//lcd.print("Mainprocess");
+  //lcd.print("Mainprocess");
 #ifdef SERIAL_PRINT
   Serial.print ("Main process: ") ;
   Serial.println (dummy_counter) ;

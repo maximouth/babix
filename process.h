@@ -12,8 +12,8 @@ extern "C" {
 #endif
 
 extern struct kernel_t kernel ;
-
 proc_id_t create_process (void (*code)()) ;
+  __attribute__ ( ( naked ) ) void end_process ();
 
 #ifdef __cplusplus
 }

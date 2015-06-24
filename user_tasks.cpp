@@ -1,8 +1,10 @@
 #include "user_tasks.h"
 #include <Arduino.h>
 #include <LiquidCrystal.h>
+#include "kernel.h"
 #include "mutex.h"
 #include "semaphore.h"
+#include "process.h"
 
 //#define SERIAL_DEBUG
 
@@ -67,9 +69,11 @@ void concurrent_increment (int t)
 
 /** Some examples of user processes. */
 
-void process0 ()
+void process1 ()
 {
-  for (;;) {
+ int i = 0 ;
+   for (i = 0;i < 20 ; i ++) {
+ //  for(;;) {
 #ifdef SERIAL_DEBUG
     Serial.print("I'm 1 ") ;
 #endif 
@@ -79,25 +83,34 @@ void process0 ()
     concurrent_increment(15);
     delay(70);
   }
+  lcd.print("  fin 1" );
+    end_process ();
 }
 
-void process1 ()
+void process2 ()
 { 
-    for (;;) { 
+  int i = 0 ;
+   for (i = 0;i < 30;i ++) { 
+  // for(;;) {
 #ifdef SERIAL_DEBUG
     Serial.print("I'm 2 ") ;
 #endif
+    Serial.println(kernel.main_task_sp, HEX);
     //print on the first raw
     lcd.setCursor(0,0);
     lcd.print('2');
     concurrent_increment (99);
     delay(770);
   }
+  lcd.print("  fin 2" );
+  end_process ();
 }
 
-void process2 ()
+void process3 ()
 { 
-  for (;;) {
+  int i = 0;
+  for (i = 0;i < 8; i ++) {
+  //for(;;) {
 #ifdef SERIAL_DEBUG
     Serial.print("I'm 3 ") ;
 #endif
@@ -105,13 +118,17 @@ void process2 ()
     lcd.setCursor(0,0);
     lcd.print('3');
     concurrent_increment (24) ;
-    delay(3700);
+    delay(1000);
   }
+  lcd.print("  fin 3" );
+  end_process();
 }
 
-void process3 ()
+void process4 ()
 {
-  for (;;) {
+  int i = 0;
+  for (i = 0;i < 9; i ++) {
+    //for(;;) {
 #ifdef SERIAL_DEBUG
     Serial.println ("HIGH") ;
 #endif
@@ -123,6 +140,8 @@ void process3 ()
     digitalWrite (13, LOW) ;
     delay (1000) ;
   }
+  lcd.print("  fin 4" );
+  end_process();
 }
 
 /***
@@ -142,4 +161,10 @@ void lcdDebug(int val) {
   lcd.setCursor (3,0);
   lcd.print(val);
   return;
+}
+
+
+void lcd_crnb() {
+  lcd.setCursor(5, 0);
+  lcd.print(kernel.queue.cur_nb);
 }

@@ -15,14 +15,14 @@
 
 void concurrent_increment (int t);
 
-void process0 ();
 void process1 ();
 void process2 ();
 void process3 ();
+void process4 ();
 
 void setup_lcd();
 void lcdMain(int cpt);
 void lcdDebug(int val);
-
+void lcd_crnb();
 
 #endif

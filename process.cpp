@@ -10,6 +10,7 @@
 #include "process.h"
 #include "queue.h"
 #include "mutex.h"
+#include "user_tasks.h"
 
 
 /** Mutex to prevent concurrent creation of processes. This is to prevent
@@ -48,7 +49,7 @@ proc_id_t create_process (void (*code)())
   struct hard_save_t *sp_after_hard_save ;
   /** Pointer to the stack once a software stack frame has been pushed. */
   struct soft_save_t *sp_after_soft_save ;
-  int16_t nb_processes = kernel.queue.cur_nb ;
+  int16_t nb_processes = kernel.queue.cur_nb +1 ;
 
   /* Check for enough room for a new process. */
   if (nb_processes > MAX_PROCESSES) return (MAIN_PROCESS_ID) ;
@@ -95,10 +96,18 @@ proc_id_t create_process (void (*code)())
 
   /* One more process is in the pipe... Enqueue it. */
   enqueue (&kernel.queue, nb_processes) ;
-  kernel.queue.cur_nb = nb_processes + 1 ;
+  kernel.queue.cur_nb = nb_processes ;
 
   /* Release the mutex 0 acquired at the begining of the function. */
-  mutex_release (&cr_process_mutex) ;
- 
+  mutex_release (&cr_process_mutex) ;  
   return (nb_processes) ;
 }
+
+__attribute__ ( ( naked ) ) void end_process ()
+{ 
+ lcd_crnb();
+  kernel.current_process_id = - kernel.current_process_id ;
+  SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk ;
+  for (;;) ;
+}
+
