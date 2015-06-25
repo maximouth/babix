@@ -24,5 +24,9 @@ void setup_lcd();
 void lcdMain(int cpt);
 void lcdDebug(int val);
 void lcd_crnb();
+void lcd_clear();
+
+void create1();
+void create2();
 
 #endif

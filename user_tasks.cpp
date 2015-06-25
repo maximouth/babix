@@ -6,7 +6,7 @@
 #include "semaphore.h"
 #include "process.h"
 
-//#define SERIAL_DEBUG
+#define SERIAL_DEBUG
 
 // lcd screen object
 LiquidCrystal lcd (RS,E,D0,D1,D2,D3,D4,D5,D6,D7);
@@ -37,7 +37,7 @@ void concurrent_increment (int t)
 
 
 #ifdef SERIAL_DEBUG
-  Serial.println (mutex) ;
+  //  Serial.println (mutex) ;
 #endif
   
   // read cpt and place it into x
@@ -61,7 +61,7 @@ void concurrent_increment (int t)
 
 
 #ifdef SERIAL_DEBUG
-  Serial.println (mutex) ;
+  //  Serial.println (mutex) ;
 #endif
   return ;
 }
@@ -83,8 +83,8 @@ void process1 ()
     concurrent_increment(15);
     delay(70);
   }
-  lcd.print("  fin 1" );
-    end_process ();
+   lcd.print("  fin 1" );
+   end_process ();
 }
 
 void process2 ()
@@ -95,12 +95,13 @@ void process2 ()
 #ifdef SERIAL_DEBUG
     Serial.print("I'm 2 ") ;
 #endif
-    Serial.println(kernel.main_task_sp, HEX);
+    //Serial.println(kernel.main_task_sp, HEX);
     //print on the first raw
     lcd.setCursor(0,0);
     lcd.print('2');
     concurrent_increment (99);
     delay(770);
+
   }
   lcd.print("  fin 2" );
   end_process ();
@@ -163,8 +164,14 @@ void lcdDebug(int val) {
   return;
 }
 
+void lcd_clear() {
+  lcd.clear();
+  return;
+}
+
 
 void lcd_crnb() {
   lcd.setCursor(5, 0);
   lcd.print(kernel.queue.cur_nb);
+  return;
 }

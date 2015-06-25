@@ -16,10 +16,11 @@
 #include <LiquidCrystal.h>
 
 
+
 void setup ()
 {
   int tmp = 0;
-sem_init(0,1); 
+  sem_init(0,1); 
 
 Serial.begin (9600) ;     /* Enable serial printing. */
 
@@ -88,7 +89,26 @@ void loop ()
   delay (500) ;
   dummy_counter++ ;
   lcdMain(dummy_counter);
-  //lcd.print("Mainprocess");
+  
+  if (dummy_counter > 20) {
+    lcd_clear();
+    create_process (process2);
+    create_process (process4);
+    create_process (process1);
+    create_process (process3);   
+    create_process (process1);
+    create_process (process2);
+    create_process (process3);
+    create_process (process4);
+    create_process (process2);
+    create_process (process1);
+    create_process (process1);
+    create_process (process1);
+    create_process (process1);
+    create_process (process1);
+    dummy_counter = 0;
+  }
+  
 #ifdef SERIAL_PRINT
   Serial.print ("Main process: ") ;
   Serial.println (dummy_counter) ;

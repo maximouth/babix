@@ -52,7 +52,11 @@ proc_id_t create_process (void (*code)())
   int16_t nb_processes = kernel.queue.cur_nb +1 ;
 
   /* Check for enough room for a new process. */
-  if (nb_processes > MAX_PROCESSES) return (MAIN_PROCESS_ID) ;
+  if (nb_processes >= MAX_PROCESSES){
+    mutex_release (&cr_process_mutex) ;  
+    Serial.println("trop p");
+    return (MAIN_PROCESS_ID) ;
+  }
   /* Register the process in the processes table. */
   kernel.processes[nb_processes].pid = nb_processes ;
 
@@ -105,7 +109,7 @@ proc_id_t create_process (void (*code)())
 
 __attribute__ ( ( naked ) ) void end_process ()
 { 
- lcd_crnb();
+  //lcd_crnb();
   kernel.current_process_id = - kernel.current_process_id ;
   SCB->ICSR |= SCB_ICSR_PENDSVSET_Msk ;
   for (;;) ;
