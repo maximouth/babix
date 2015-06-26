@@ -6,12 +6,12 @@
 static volatile uint32_t DebugSem = 0;
 #endif
 
-static volatile uint32_t S[5] = {0,0,0,0,0};
+static volatile uint32_t S = 0;
 
 /* Initialise the semaphore number "num" to the value "val". */
 void sem_init (int num, int val)
  {
-  S[num] = val;
+   // S[num] = val;
   return;
 }
 
@@ -20,7 +20,7 @@ void sem_init (int num, int val)
     Attempt to acquire one of the lock. This function used the number of the 
     lock you are going to use as argument
  ***/
-void sem_acquire (int num)
+void sem_acquire (int *S)
 {
 /*  No need to save the registers used in this function. In effect, we only
     use scratch registers r1 and r2. Gcc seems to store our argument in r0
@@ -30,7 +30,7 @@ void sem_acquire (int num)
  sem:
   /* Ask an exclusive access on the lock and get its value by the way
      (c.f. datasheet section 12.5.7 page 78 and section 12.12.8 page 112.  */
-  asm volatile ("ldrex r1, [%0]   \n\t" :: "r" (&S[num]) : "r1", "memory") ;
+  asm volatile ("ldrex r1, [%0]   \n\t" :: "r" (S) : "r1", "memory") ;
 
 #ifdef DEBUG
   /* If you want to print the lock value use one the this.
@@ -43,7 +43,7 @@ void sem_acquire (int num)
      Serial.println (DebugSem) ;
   */
   // print on the lcd screen.
-  lcdDebug(S[0]);
+  //lcdDebug(S[0]);
   asm volatile ("pop {r1, r0 }  \n\t") ;
 #endif
 
@@ -62,7 +62,7 @@ void sem_acquire (int num)
      decrement it's value. */
   asm volatile ("sub r1, r1, #1  \n\t" ::: "r1") ;
   /* And stock it in the right lock */
-  asm volatile ("strex r2, r1, [%0]  \n\t" :: "r" (&S[num]) : "r2", "memory") ;
+  asm volatile ("strex r2, r1, [%0]  \n\t" :: "r" (S) : "r2", "memory") ;
 
   /*  Check return value: if 0 write succeeded otherwise failure. In case of
       failure we must retry the whole process (i.e. reading the lock's value
@@ -79,7 +79,14 @@ void sem_acquire (int num)
     Release one lock whose number is passed as argument.
     Typically, this is to call after the critical section.
 ***/
-void sem_release (int num) 
+void sem_release (int *S) 
 {
-  S[num] += 1 ;
+ rel:
+  asm volatile ("ldrex r1, [%0]   \n\t" :: "r" (S) : "r1", "memory") ;
+  asm volatile ("add r1, r1, #1\n\t");
+  asm volatile ("strex r2, r1, [%0]  \n\t" :: "r" (S) : "r2", "memory") ;
+  asm volatile ("mov r1, #1  \n\t" ::: "r1") ;
+  asm volatile ("cmp r2, r1      \n\t") ;
+  asm volatile goto ("beq %0   \n\t" :::: rel) ;  /* Loop back. */
+  return ;
 }

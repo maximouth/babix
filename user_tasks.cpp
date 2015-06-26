@@ -20,6 +20,8 @@ void setup_lcd() {
 volatile uint32_t cpt = 0 ;
 /** The lock to protect the shared variable. 0 == free, 1 == taken. */
 static mutex_t mutex = 0 ;
+/** The semaphore to protect the shared variable. 0 == taken, >0 == free. */
+static int S = 1;
 
 // the critical section
 // read cpt, wait, cpt = cpt + 1, print cpt
@@ -31,9 +33,9 @@ void concurrent_increment (int t)
   /* Claim the lock to prevent several processes from modifying the kernel
      tables concurrently if they attempt to create processes "at the same
      time". */
-  mutex_acquire (&mutex) ;
+  //mutex_acquire (&mutex) ;
   
-  //sem_acquire(0);
+  sem_acquire(&S);
 
 
 #ifdef SERIAL_DEBUG
@@ -56,8 +58,8 @@ void concurrent_increment (int t)
   lcd.print (cpt) ;
   
   /* Release the mutex to leave the critical section. */
-  mutex_release (&mutex) ;
-  //sem_release(0);
+  //mutex_release (&mutex) ;
+  sem_release(&S);
 
 
 #ifdef SERIAL_DEBUG
